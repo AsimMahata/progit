@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::Parser;
 use chrono::Local;
 
+mod backup;
 mod cli;
 mod commands;
 mod db;
@@ -17,7 +18,7 @@ async fn main() -> Result<()> {
     let pool = db::init_db().await?;
 
     match cli.command {
-        // ── Codeforces ────────────────────────────────────────────────────────
+        // ── Codeforces ─────
         Commands::Cf { help_me, rating, difficulty, rest, date, time } => {
             // `progit cf help` → no rating, first rest token is "help"
             let first = rest.first().map(|s| s.as_str()).unwrap_or("");
@@ -33,7 +34,7 @@ async fn main() -> Result<()> {
             }
         }
 
-        // ── LeetCode ──────────────────────────────────────────────────────────
+        // ── LeetCode ───────
         Commands::Lc { difficulty, topic, notes, date, time } => {
             match difficulty.as_deref() {
                 Some("help") => lc::print_lc_help(),
@@ -47,7 +48,7 @@ async fn main() -> Result<()> {
             }
         }
 
-        // ── Task subcommands ──────────────────────────────────────────────────
+        // ── Task subcommands ───
         Commands::Task { action } => match action {
             TaskAction::Add => {
                 task::handle_task_add(&pool).await?;
@@ -64,7 +65,7 @@ async fn main() -> Result<()> {
             }
         },
 
-        // ── Tasks shorthand ───────────────────────────────────────────────────
+        // ── Tasks shorthand 
         Commands::Tasks { todo, doing, done, cancelled } => {
             let filter = if todo      { Some("Todo") }
                          else if doing     { Some("Doing") }
@@ -75,19 +76,19 @@ async fn main() -> Result<()> {
             display::print_task_list(&tasks);
         }
 
-        // ── Note ──────────────────────────────────────────────────────────────
+        // ── Note ───
         Commands::Note { text, date, time } => {
             note::handle_note(&pool, text, date, time).await?;
         }
 
-        // ── View: today ───────────────────────────────────────────────────────
+        // ── View: today ────
         Commands::Today => {
             let today = Local::now().format("%Y-%m-%d").to_string();
             let v = view::build_day_view(&pool, &today).await?;
             display::print_day(&v);
         }
 
-        // ── View: yesterday ───────────────────────────────────────────────────
+        // ── View: yesterday 
         Commands::Yesterday => {
             use chrono::Duration;
             let yesterday = (Local::now() - Duration::days(1))
@@ -97,13 +98,13 @@ async fn main() -> Result<()> {
             display::print_day(&v);
         }
 
-        // ── View: specific date ───────────────────────────────────────────────
+        // ── View: specific date 
         Commands::Date { date } => {
             let v = view::build_day_view(&pool, &date).await?;
             display::print_day(&v);
         }
 
-        // ── View: last N days ─────────────────────────────────────────────────
+        // ── View: last N days ──
         Commands::Last { days } => {
             let views = view::build_last_n_days(&pool, days).await?;
             display::print_days(&views);
@@ -120,16 +121,37 @@ async fn main() -> Result<()> {
             display::print_activity_list(&entries, "leetcode");
         }
 
-        // ── Edit activity by ID ───────────────────────────────────────────────
+        // ── Edit activity by ID 
         Commands::Edit { id, date, time, rating, difficulty, notes, tags, topic, lc_difficulty } => {
             edit::handle_edit_activity(
                 &pool, id, date, time, rating, difficulty, notes, tags, topic, lc_difficulty,
             ).await?;
         }
 
-        // ── Edit note by ID ───────────────────────────────────────────────────
+        // ── Edit note by ID 
         Commands::EditNote { id, text, date, time } => {
             edit::handle_edit_note(&pool, id, text, date, time).await?;
+        }
+
+        // ── Stats ────────────────────────────────────────────────────────────────
+        Commands::Stats { days } => {
+            let stats = commands::stats::fetch_stats(&pool, days).await?;
+            display::print_stats(&stats);
+        }
+
+        // ── Backup ────────────────────────────────────────────────────────────────
+        Commands::Backup { name } => {
+            commands::backup_restore::handle_backup(&pool, name).await?;
+        }
+
+        // ── Restore ───────────────────────────────────────────────────────────────
+        Commands::Restore { name } => {
+            commands::backup_restore::handle_restore(&pool, name).await?;
+        }
+
+        // ── List backups ──────────────────────────────────────────────────────────
+        Commands::Backups => {
+            commands::backup_restore::handle_list_backups()?;
         }
 
         // ── Uninstall ─────────────────────────────────────────────────────────

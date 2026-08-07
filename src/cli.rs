@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-// ─── Top-level CLI ────────────────────────────────────────────────────────────
+// ─── Top-level CLI ─
 
 #[derive(Parser)]
 #[command(
@@ -15,7 +15,7 @@ pub struct Cli {
     pub command: Commands,
 }
 
-// ─── Subcommands ─────────────────────────────────────────────────────────────
+// ─── Subcommands ──
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -256,9 +256,56 @@ pub enum Commands {
     /// Uninstall progit — removes the binary and all data in ~/.progit/
     #[command(name = "uninstall")]
     Uninstall,
+
+    /// Show overall progress stats (notes, Codeforces, LeetCode)
+    ///
+    /// Examples:
+    ///   progit stats
+    ///   progit stats --days 30
+    ///   progit stats --days 7
+    #[command(name = "stats")]
+    Stats {
+        /// Narrow stats to the last N days (default: all time)
+        #[arg(long, short = 'd')]
+        days: Option<u32>,
+    },
+
+    /// Create a full database backup checkpoint
+    ///
+    /// Saves all data to ~/tools/progit/backups/<name>/
+    /// and updates ~/tools/progit/current/ with the latest snapshot.
+    ///
+    /// Examples:
+    ///   progit backup
+    ///   progit backup pre-hackathon
+    ///   progit backup 2026-08-07
+    #[command(name = "backup")]
+    Backup {
+        /// Checkpoint name (default: today's date YYYY-MM-DD)
+        name: Option<String>,
+    },
+
+    /// Restore database from a named backup checkpoint
+    ///
+    /// Will ask before overwriting your current data.
+    ///
+    /// Examples:
+    ///   progit restore 2026-08-07
+    ///   progit restore pre-hackathon
+    #[command(name = "restore")]
+    Restore {
+        /// Checkpoint name to restore from
+        name: String,
+    },
+
+    /// List all available backup checkpoints
+    ///
+    /// Example: progit backups
+    #[command(name = "backups")]
+    Backups,
 }
 
-// ─── Task subcommands ─────────────────────────────────────────────────────────
+// ─── Task subcommands ──────
 
 #[derive(Subcommand)]
 pub enum TaskAction {

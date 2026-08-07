@@ -4,12 +4,12 @@ use owo_colors::OwoColorize;
 
 use crate::models::{Activity, DayView, Task};
 
-// ─── Shared layout constants ─────────────────────────────────────────────────
+// ─── Shared layout constants ──
 
 const DIVIDER: &str = "────────────────────────────────────────";
 const HEADER:  &str = "════════════════════════════════════════";
 
-// ─── Date formatting ─────────────────────────────────────────────────────────
+// ─── Date formatting ──────
 
 fn format_date_heading(date: &str) -> String {
     if let Ok(d) = NaiveDate::parse_from_str(date, "%Y-%m-%d") {
@@ -19,7 +19,7 @@ fn format_date_heading(date: &str) -> String {
     }
 }
 
-// ─── Day view printer ─────────────────────────────────────────────────────────
+// ─── Day view printer ──────
 
 pub fn print_day(view: &DayView) {
     let has_anything = !view.activities.is_empty()
@@ -43,7 +43,7 @@ pub fn print_day(view: &DayView) {
         return;
     }
 
-    // ── Codeforces ───────────────────────────────────────────────────────────
+    // ── Codeforces 
     let cf_entries: Vec<&Activity> = view
         .activities
         .iter()
@@ -94,7 +94,7 @@ pub fn print_day(view: &DayView) {
         }
     }
 
-    // ── LeetCode ─────────────────────────────────────────────────────────────
+    // ── LeetCode ──
     let lc_entries: Vec<&Activity> = view
         .activities
         .iter()
@@ -145,7 +145,7 @@ pub fn print_day(view: &DayView) {
         }
     }
 
-    // ── Tasks ─────────────────────────────────────────────────────────────────
+    // ── Tasks ──────
     if !view.tasks.is_empty() {
         println!();
         println!("  {} {}", "✅", "TASKS".green().bold());
@@ -191,7 +191,7 @@ pub fn print_day(view: &DayView) {
         }
     }
 
-    // ── Notes ─────────────────────────────────────────────────────────────────
+    // ── Notes ──────
     if !view.notes.is_empty() {
         println!();
         println!("  {} {}", "📝", "NOTES".magenta().bold());
@@ -217,7 +217,7 @@ pub fn print_day(view: &DayView) {
     println!();
 }
 
-// ─── Multi-day view ───────────────────────────────────────────────────────────
+// ─── Multi-day view 
 
 pub fn print_days(views: &[DayView]) {
     for view in views {
@@ -225,7 +225,7 @@ pub fn print_days(views: &[DayView]) {
     }
 }
 
-// ─── Task list view ───────────────────────────────────────────────────────────
+// ─── Task list view 
 
 pub fn print_task_list(tasks: &[Task]) {
     if tasks.is_empty() {
@@ -354,4 +354,185 @@ pub fn print_activity_list(activities: &[Activity], platform: &str) {
         println!("    {}", line);
     }
     println!();
+}
+
+// ─── Stats dashboard ─
+
+pub fn print_stats(s: &crate::commands::stats::StatsData) {
+    let title = match s.days_filter {
+        Some(n) => format!("Last {} Days", n),
+        None    => "All Time".to_string(),
+    };
+
+    println!();
+    println!("  {}", HEADER.bright_cyan());
+    println!(
+        "  {}  {}  ·  {}",
+        "📊",
+        "PROGIT STATS".white().bold(),
+        title.bright_black()
+    );
+    println!("  {}", HEADER.bright_cyan());
+
+    // ── Overview 
+    println!();
+    println!("  {} {}", "🔥", "OVERVIEW".white().bold());
+    println!("  {}", DIVIDER.bright_black());
+
+    let first = s.overall.first_log_date
+        .as_deref()
+        .map(format_date_heading)
+        .unwrap_or_else(|| "–".to_string());
+
+    let streak_str = if s.overall.current_streak == 0 {
+        "0 days".dimmed().to_string()
+    } else {
+        format!("{} days 🔥", s.overall.current_streak).yellow().bold().to_string()
+    };
+
+    println!("    {:<18} {}", "Active Days".bold(), s.overall.active_days);
+    println!("    {:<18} {}", "First Log".bold(), first);
+    println!("    {:<18} {}", "Current Streak".bold(), streak_str);
+
+    // ── Codeforces ──
+    println!();
+    println!(
+        "  {} {}  {}",
+        "⚡",
+        "CODEFORCES".cyan().bold(),
+        format!("({} problems)", s.cf.total).bright_black()
+    );
+    println!("  {}", DIVIDER.bright_black());
+
+    if s.cf.total == 0 {
+        println!("    {}", "No Codeforces entries yet.".dimmed());
+    } else {
+        let avg = if s.cf.avg_rating > 0.0 {
+            format!("{:.0}", s.cf.avg_rating)
+        } else {
+            "–".to_string()
+        };
+        println!(
+            "    {:<18} {}    {}  {}   {}  {}",
+            "Avg Rating".bold(), avg.cyan(),
+            "This week".bold(),  s.cf.this_week.to_string().cyan(),
+            "This month".bold(), s.cf.this_month.to_string().cyan()
+        );
+
+        println!();
+        println!("    {}", "Rating Distribution".bold());
+        let bucket_labels = ["< 1200   ", "1200–1399", "1400–1599", "1600–1799", "1800–1999", "2000–2199", "≥ 2200   "];
+        let max_bucket = *s.cf.rating_buckets.iter().max().unwrap_or(&1).max(&1);
+        for (i, &count) in s.cf.rating_buckets.iter().enumerate() {
+            let bar = make_bar(count, max_bucket, 30);
+            println!(
+                "    {} │ {:>3} │ {}",
+                bucket_labels[i].bright_black(),
+                count,
+                bar.cyan()
+            );
+        }
+
+        println!();
+        println!("    {}", "Difficulty Breakdown".bold());
+        let diff_labels = ["★☆☆☆☆  Easy     ", "★★☆☆☆  Medium   ", "★★★☆☆  Hard     ", "★★★★☆  VeryHard ", "★★★★★  Insane   "];
+        let max_diff = *s.cf.difficulty_counts.iter().max().unwrap_or(&1).max(&1);
+        for (i, &count) in s.cf.difficulty_counts.iter().enumerate() {
+            let bar = make_bar(count, max_diff, 30);
+            println!(
+                "    {} │ {:>3} │ {}",
+                diff_labels[i].yellow(),
+                count,
+                bar.yellow()
+            );
+        }
+
+        if !s.cf.top_tags.is_empty() {
+            println!();
+            let tags_str = s.cf.top_tags
+                .iter()
+                .map(|(t, n)| format!("{} · {}", t.cyan(), n))
+                .collect::<Vec<_>>()
+                .join("   ");
+            println!("    {}    {}", "Top Tags".bold(), tags_str);
+        }
+    }
+
+    // ── LeetCode 
+    println!();
+    println!(
+        "  {} {}  {}",
+        "📘",
+        "LEETCODE".yellow().bold(),
+        format!("({} problems)", s.lc.total).bright_black()
+    );
+    println!("  {}", DIVIDER.bright_black());
+
+    if s.lc.total == 0 {
+        println!("    {}", "No LeetCode entries yet.".dimmed());
+    } else {
+        println!(
+            "    {}  {}   {}  {}",
+            "This week".bold(),  s.lc.this_week.to_string().yellow(),
+            "This month".bold(), s.lc.this_month.to_string().yellow()
+        );
+
+        println!();
+        let lc_max = s.lc.easy.max(s.lc.medium).max(s.lc.hard).max(1);
+        let easy_bar   = make_bar(s.lc.easy,   lc_max, 34);
+        let medium_bar = make_bar(s.lc.medium, lc_max, 34);
+        let hard_bar   = make_bar(s.lc.hard,   lc_max, 34);
+        println!(
+            "    {} ({:>3})  {}",
+            "Easy  ".green().bold(), s.lc.easy,   easy_bar.green()
+        );
+        println!(
+            "    {} ({:>3})  {}",
+            "Medium".yellow().bold(), s.lc.medium, medium_bar.yellow()
+        );
+        println!(
+            "    {} ({:>3})  {}",
+            "Hard  ".red().bold(),    s.lc.hard,   hard_bar.red()
+        );
+
+        if !s.lc.top_topics.is_empty() {
+            println!();
+            let topics_str = s.lc.top_topics
+                .iter()
+                .map(|(t, n)| format!("{} · {}", t.yellow(), n))
+                .collect::<Vec<_>>()
+                .join("   ");
+            println!("    {}  {}", "Top Topics".bold(), topics_str);
+        }
+    }
+
+    // ── Notes ────
+    println!();
+    println!(
+        "  {} {}  {}",
+        "📝",
+        "NOTES".magenta().bold(),
+        format!("({} total)", s.notes.total).bright_black()
+    );
+    println!("  {}", DIVIDER.bright_black());
+    println!(
+        "    {}  {}   {}  {}",
+        "This week".bold(),  s.notes.this_week.to_string().magenta(),
+        "This month".bold(), s.notes.this_month.to_string().magenta()
+    );
+
+    println!();
+    println!("  {}", HEADER.bright_cyan());
+    println!();
+}
+
+// ─── Bar chart helper 
+
+fn make_bar(count: i64, max: i64, width: usize) -> String {
+    if count == 0 || max == 0 {
+        return String::new();
+    }
+    let filled = ((count as f64 / max as f64) * width as f64).round() as usize;
+    let filled = filled.max(1);
+    "█".repeat(filled)
 }

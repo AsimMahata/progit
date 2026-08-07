@@ -4,8 +4,9 @@ use owo_colors::OwoColorize;
 use sqlx::SqlitePool;
 
 use crate::models::Activity;
+use crate::backup;
 
-// ─── Contextual help ─────────────────────────────────────────────────────────
+// ─── Contextual help ──────
 
 pub fn print_cf_help() {
     println!();
@@ -32,7 +33,7 @@ pub fn print_cf_help() {
     println!();
 }
 
-// ─── Command handler ─────────────────────────────────────────────────────────
+// ─── Command handler ──────
 
 pub async fn handle_cf(
     pool: &SqlitePool,
@@ -123,6 +124,11 @@ pub async fn handle_cf(
     .execute(pool)
     .await
     .context("Failed to insert Codeforces activity")?;
+
+    // Mirror to durable backup (best-effort — don't fail the whole command on backup error)
+    if let Err(e) = backup::append_cf(rating, difficulty, &tags, notes.as_deref(), &date, &time) {
+        eprintln!("  ⚠ Backup write failed: {}", e);
+    }
 
     println!();
     println!(

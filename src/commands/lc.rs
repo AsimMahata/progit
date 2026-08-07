@@ -3,9 +3,10 @@ use chrono::Local;
 use owo_colors::OwoColorize;
 use sqlx::SqlitePool;
 
+use crate::backup;
 use crate::models::Activity;
 
-// ─── Contextual help ─────────────────────────────────────────────────────────
+// ─── Contextual help ──────
 
 pub fn print_lc_help() {
     println!();
@@ -31,7 +32,7 @@ pub fn print_lc_help() {
     println!();
 }
 
-// ─── Difficulty mapping ───────────────────────────────────────────────────────
+// ─── Difficulty mapping ────
 
 fn lc_difficulty_to_int(d: &str) -> Option<i64> {
     match d.to_lowercase().as_str() {
@@ -51,7 +52,7 @@ fn normalize_difficulty(d: &str) -> &'static str {
     }
 }
 
-// ─── Command handler ─────────────────────────────────────────────────────────
+// ─── Command handler ──────
 
 pub async fn handle_lc(
     pool: &SqlitePool,
@@ -109,6 +110,11 @@ pub async fn handle_lc(
     .execute(pool)
     .await
     .context("Failed to insert LeetCode activity")?;
+
+    // Mirror to durable backup (best-effort)
+    if let Err(e) = backup::append_lc(lc_difficulty, topic.as_deref(), notes.as_deref(), &date, &time) {
+        eprintln!("  ⚠ Backup write failed: {}", e);
+    }
 
     let difficulty_colored = match lc_difficulty {
         "Easy"   => "Easy".green().to_string(),

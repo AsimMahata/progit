@@ -43,7 +43,7 @@ impl Activity {
     }
 }
 
-// ─── Task ─────────────────────────────────────────────────────────────────────
+// ─── Task ──────────
 
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct Task {
@@ -81,7 +81,7 @@ pub fn parse_priority(s: &str) -> Option<i64> {
     }
 }
 
-// ─── Note ────────────────────────────────────────────────────────────────────
+// ─── Note ─────────
 
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct Note {
@@ -93,7 +93,7 @@ pub struct Note {
     pub updated_at: String,
 }
 
-// ─── DayView ─────────────────────────────────────────────────────────────────
+// ─── DayView ──────
 
 /// Everything logged on a given date, collected for display.
 pub struct DayView {

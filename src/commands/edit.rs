@@ -4,7 +4,7 @@ use sqlx::SqlitePool;
 
 use crate::models::{Activity, Note};
 
-// ─── Edit activity ────────────────────────────────────────────────────────────
+// ─── Edit activity ─
 
 pub async fn handle_edit_activity(
     pool: &SqlitePool,
@@ -100,7 +100,7 @@ pub async fn handle_edit_activity(
     Ok(())
 }
 
-// ─── Edit note ────────────────────────────────────────────────────────────────
+// ─── Edit note ─────
 
 pub async fn handle_edit_note(
     pool: &SqlitePool,
@@ -145,14 +145,14 @@ pub async fn handle_edit_note(
     Ok(())
 }
 
-// ─── Uninstall ────────────────────────────────────────────────────────────────
+// ─── Uninstall ───
 
 pub fn handle_uninstall() -> Result<()> {
     println!();
     println!("  {} {}", "⚠".yellow().bold(), "Uninstalling progit".bold());
     println!();
 
-    // Remove data directory
+    // Remove data directory (SQLite database)
     let data_dir = crate::db::data_dir()?;
     if data_dir.exists() {
         std::fs::remove_dir_all(&data_dir)
@@ -172,6 +172,25 @@ pub fn handle_uninstall() -> Result<()> {
             println!("  {} Removed binary: {}", "✓".green(), bin_path.display());
         } else {
             println!("  {} Binary not found at {} (installed differently?)", "·".dimmed(), bin_path.display());
+        }
+    }
+
+    // ── Backup preserved ───────
+    if let Some(home) = dirs::home_dir() {
+        let backup_path = home.join("tools").join("progit");
+        if backup_path.exists() {
+            println!();
+            println!(
+                "  {} {}",
+                "📦".cyan(),
+                "Backup data preserved — your logs are safe:".bold()
+            );
+            println!(
+                "     {}",
+                backup_path.display().to_string().cyan()
+            );
+            println!("     (codeforces.txt  leetcode.txt  notes.txt)");
+            println!("     This folder was NOT deleted. Reinstall progit anytime to keep tracking.");
         }
     }
 

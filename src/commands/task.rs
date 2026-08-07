@@ -5,7 +5,7 @@ use std::io::{self, Write};
 
 use crate::models::{parse_priority, Task};
 
-// ─── Prompt helpers ───────────────────────────────────────────────────────────
+// ─── Prompt helpers 
 
 fn prompt(label: &str) -> Result<String> {
     print!("{} ", label.bold());
@@ -24,7 +24,7 @@ fn prompt_optional(label: &str, hint: &str) -> Result<Option<String>> {
     Ok(if s.is_empty() { None } else { Some(s) })
 }
 
-// ─── Add task ─────────────────────────────────────────────────────────────────
+// ─── Add task ──────
 
 pub async fn handle_task_add(pool: &SqlitePool) -> Result<()> {
     println!();
@@ -80,7 +80,7 @@ pub async fn handle_task_add(pool: &SqlitePool) -> Result<()> {
     Ok(())
 }
 
-// ─── Edit task ────────────────────────────────────────────────────────────────
+// ─── Edit task ─────
 
 pub async fn handle_task_edit(pool: &SqlitePool, id: i64) -> Result<()> {
     let task = sqlx::query_as::<_, Task>("SELECT * FROM tasks WHERE id = ?")
@@ -193,7 +193,7 @@ pub async fn handle_task_edit(pool: &SqlitePool, id: i64) -> Result<()> {
     Ok(())
 }
 
-// ─── Set status ───────────────────────────────────────────────────────────────
+// ─── Set status ────
 
 pub async fn handle_task_status(pool: &SqlitePool, id: i64, status: String) -> Result<()> {
     let result = sqlx::query("UPDATE tasks SET status = ? WHERE id = ?")
@@ -214,7 +214,7 @@ pub async fn handle_task_status(pool: &SqlitePool, id: i64, status: String) -> R
     Ok(())
 }
 
-// ─── List tasks ───────────────────────────────────────────────────────────────
+// ─── List tasks ────
 
 pub async fn handle_tasks_list(pool: &SqlitePool, filter: Option<&str>) -> Result<Vec<Task>> {
     let tasks = if let Some(f) = filter {

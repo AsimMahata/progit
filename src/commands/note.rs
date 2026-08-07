@@ -3,6 +3,8 @@ use chrono::Local;
 use owo_colors::OwoColorize;
 use sqlx::SqlitePool;
 
+use crate::backup;
+
 pub async fn handle_note(
     pool: &SqlitePool,
     text: String,
@@ -20,6 +22,11 @@ pub async fn handle_note(
         .execute(pool)
         .await
         .context("Failed to insert note")?;
+
+    // Mirror to durable backup (best-effort)
+    if let Err(e) = backup::append_note(&text, &date, &time) {
+        eprintln!("  ⚠ Backup write failed: {}", e);
+    }
 
     println!();
     println!(

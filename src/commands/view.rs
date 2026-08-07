@@ -3,7 +3,7 @@ use sqlx::SqlitePool;
 
 use crate::models::{Activity, DayView, Note, Task};
 
-// ─── Query helpers ────────────────────────────────────────────────────────────
+// ─── Query helpers ─
 
 async fn activities_for_date(pool: &SqlitePool, date: &str) -> Result<Vec<Activity>> {
     sqlx::query_as::<_, Activity>(
@@ -36,7 +36,7 @@ async fn notes_for_date(pool: &SqlitePool, date: &str) -> Result<Vec<Note>> {
     .context("Failed to query notes")
 }
 
-// ─── DayView builder ─────────────────────────────────────────────────────────
+// ─── DayView builder ──────
 
 pub async fn build_day_view(pool: &SqlitePool, date: &str) -> Result<DayView> {
     let activities = activities_for_date(pool, date).await?;
@@ -45,7 +45,7 @@ pub async fn build_day_view(pool: &SqlitePool, date: &str) -> Result<DayView> {
     Ok(DayView { date: date.to_string(), activities, tasks, notes })
 }
 
-// ─── Multi-day view ───────────────────────────────────────────────────────────
+// ─── Multi-day view 
 
 pub async fn build_last_n_days(pool: &SqlitePool, days: u32) -> Result<Vec<DayView>> {
     use chrono::{Duration, Local};
