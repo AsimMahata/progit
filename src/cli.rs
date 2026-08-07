@@ -25,23 +25,14 @@ pub enum Commands {
     ///   progit cf 1700 1 E1
     ///   progit cf 1900 3 E2 T5
     ///   progit cf 2100 5 CHT "Needed editorial"
+    ///   progit cf list
+    ///   progit cf list --all
     ///   progit cf help
     #[command(name = "cf", alias = "codeforces")]
     Cf {
         /// Show usage help for the cf command
         #[arg(long, action = clap::ArgAction::SetTrue)]
         help_me: bool,
-
-        /// Problem rating (e.g. 1700, 1900)
-        rating: Option<i64>,
-
-        /// Difficulty from 1 (Easy) to 5 (Insane)
-        difficulty: Option<i64>,
-
-        /// Tags (bare tokens) and/or a quoted note string
-        /// Examples: E1 WA3 BinarySearch "Forgot binary search"
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        rest: Vec<String>,
 
         /// Override date (YYYY-MM-DD), defaults to today
         #[arg(long, short = 'd')]
@@ -50,6 +41,10 @@ pub enum Commands {
         /// Override time (HH:MM), defaults to now
         #[arg(long, short = 't')]
         time: Option<String>,
+
+        /// Arguments: [list [--all] | help | <rating> <difficulty> [tags...] ["notes"]]
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
     },
 
     /// Log a LeetCode problem  [alias: lc]

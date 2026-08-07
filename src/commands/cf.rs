@@ -17,7 +17,7 @@ pub fn print_cf_help() {
     println!();
     println!("  {}", "Fields:".bold());
     println!("    rating      Problem rating (e.g. 1700, 1900, 2100)");
-    println!("    difficulty  1=Easy  2=Medium  3=Hard  4=Very Hard  5=Insane");
+    println!("    difficulty  1=Easy  2=Okay  3=Medium  4=Hard  5=Insane");
     println!("    tags        Any space-separated tokens (E1, WA3, BinarySearch, CHT, ...)");
     println!("    notes       Quoted string at the end (optional)");
     println!();

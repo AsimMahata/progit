@@ -19,17 +19,19 @@ async fn main() -> Result<()> {
 
     match cli.command {
         // ── Codeforces ─────
-        Commands::Cf { help_me, rating, difficulty, rest, date, time } => {
-            // `progit cf help` → no rating, first rest token is "help"
-            let first = rest.first().map(|s| s.as_str()).unwrap_or("");
-            if help_me || (rating.is_none() && first == "help") {
+        Commands::Cf { help_me, args, date, time } => {
+            let first = args.first().map(|s| s.as_str()).unwrap_or("");
+            if help_me || first == "help" {
                 cf::print_cf_help();
-            } else if rating.is_none() && first == "list" {
-                // `progit cf list [--all]`
-                let show_all = rest.iter().any(|s| s == "--all");
+            } else if first == "list" {
+                let show_all = args.iter().any(|s| s == "--all");
                 let entries = cf::list_cf(&pool, show_all).await?;
                 display::print_activity_list(&entries, "codeforces");
             } else {
+                // args[0] = rating, args[1] = difficulty, args[2..] = tags/notes
+                let rating: Option<i64>     = args.first().and_then(|s| s.parse().ok());
+                let difficulty: Option<i64> = args.get(1).and_then(|s| s.parse().ok());
+                let rest: Vec<String>       = args.into_iter().skip(2).collect();
                 cf::handle_cf(&pool, rating, difficulty, rest, date, time).await?;
             }
         }

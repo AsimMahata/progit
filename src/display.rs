@@ -435,7 +435,7 @@ pub fn print_stats(s: &crate::commands::stats::StatsData) {
 
         println!();
         println!("    {}", "Difficulty Breakdown".bold());
-        let diff_labels = ["★☆☆☆☆  Easy     ", "★★☆☆☆  Medium   ", "★★★☆☆  Hard     ", "★★★★☆  VeryHard ", "★★★★★  Insane   "];
+        let diff_labels = ["★☆☆☆☆  Easy   ", "★★☆☆☆  Okay   ", "★★★☆☆  Medium ", "★★★★☆  Hard   ", "★★★★★  Insane "];
         let max_diff = *s.cf.difficulty_counts.iter().max().unwrap_or(&1).max(&1);
         for (i, &count) in s.cf.difficulty_counts.iter().enumerate() {
             let bar = make_bar(count, max_diff, 30);
