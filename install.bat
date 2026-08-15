@@ -10,7 +10,7 @@ echo [*] Requirements:
 echo     - Rust and Cargo in PATH (https://rustup.rs/)
 echo     - Git in PATH
 echo.
-echo [!] Tips:
+echo [*] Tips:
 echo     - Compiles in optimized release mode
 echo     - Installs binary to %USERPROFILE%\.cargo\bin\progit.exe
 echo     - Run 'progit --help' to see productivity workflows
