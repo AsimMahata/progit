@@ -6,6 +6,10 @@ echo ======================================================================
 echo   PROGIT - Git Productivity Enhancer (Uninstaller)
 echo ======================================================================
 echo.
+echo [!] Tips:
+echo     - If uninstallation fails due to permissions, run with 'sudow uninstall.bat'
+echo     - If you don't have sudow, install it via 'tom install sudow'
+echo.
 
 if "%1" neq "-y" if "%1" neq "--yes" (
     set /p "CONFIRM=Are you sure you want to uninstall progit? [Y/n]: "

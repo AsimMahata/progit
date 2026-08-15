@@ -14,6 +14,7 @@ echo [!] Tips:
 echo     - Compiles in optimized release mode
 echo     - Installs binary to %USERPROFILE%\.cargo\bin\progit.exe
 echo     - Run 'progit --help' to see productivity workflows
+echo     - If install fails due to permissions, run with 'sudow install.bat' (run 'tom install sudow' to get sudow)
 echo.
 
 if "%1" neq "-y" if "%1" neq "--yes" (
@@ -37,7 +38,7 @@ echo.
 echo [2/3] Compiling progit in release mode...
 cargo build --release
 if %ERRORLEVEL% neq 0 (
-    echo [ERROR] Compilation failed.
+    echo [ERROR] Compilation failed. If this is a permission issue, run with 'sudow install.bat' (or install sudow via 'tom install sudow').
     exit /b 1
 )
 
@@ -47,6 +48,10 @@ if not exist "%USERPROFILE%\.cargo\bin" mkdir "%USERPROFILE%\.cargo\bin" 2>nul
 copy /Y "target\release\progit.exe" "%USERPROFILE%\.cargo\bin\progit.exe" >nul
 if %ERRORLEVEL% neq 0 (
     powershell -NoProfile -Command "Copy-Item -Path 'target\release\progit.exe' -Destination '%USERPROFILE%\.cargo\bin\progit.exe' -Force" >nul 2>nul
+)
+if %ERRORLEVEL% neq 0 (
+    echo [ERROR] Copying binary failed. If this is a permission issue, run with 'sudow install.bat' (or install sudow via 'tom install sudow').
+    exit /b 1
 )
 
 echo.
