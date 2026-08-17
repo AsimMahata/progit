@@ -1,5 +1,5 @@
 name = "progit"
-description = "Git productivity enhancements and workflow helper"
+description = "Personal progress and activity tracker CLI"
 version = "0.1.0"
 author = "Asim Mahata"
-tags = ["git", "workflow", "productivity"]
+tags = ["progress", "tracker", "leetcode", "codeforces", "tasks"]
